@@ -54,6 +54,7 @@ def main():
         file_contents = file.read()
 
     tokenize(file_contents)
+    exit(error_code)
 
 
 if __name__ == "__main__":
