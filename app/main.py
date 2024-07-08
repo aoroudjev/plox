@@ -19,6 +19,9 @@ def tokenize(file_contents):
                 print("COMMA , null")
             case "+":
                 print("PLUS + null")
+            case "-":
+                print("MINUS - null")
+
 
     print("EOF  null")
 
