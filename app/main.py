@@ -1,9 +1,12 @@
 import sys
 
+error_code = 0
+
 
 def tokenize(file_contents):
+    global error_code
     line = 1
-    error = False
+
     for c in file_contents:
         match c:
             case "(":
@@ -29,12 +32,10 @@ def tokenize(file_contents):
             case "\n":
                 line += 1
             case _:
-                print("[line "+str(line)+"] Error: Unexpected character: " + c)
-                error = True
+                print("[line " + str(line) + "] Error: Unexpected character: " + c)
+                error_code = 65
 
     print("EOF  null")
-    if error:
-        exit(65)
 
 
 def main():
