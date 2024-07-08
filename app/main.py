@@ -10,7 +10,7 @@ def tokenize(file_contents):
             case "}":
                 print("RIGHT_BRACE } null")
             case "{":
-                print("LEFT_BRACE } null")
+                print("LEFT_BRACE { null")
     print("EOF  null")
 
 
