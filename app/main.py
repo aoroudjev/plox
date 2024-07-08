@@ -24,6 +24,7 @@ class Scanner:
         line = 1
         while pointer < len(self.source):
             char = self.source[pointer]
+            char_next = self.advance(pointer)
             match char:
                 case '\n':
                     line += 1
@@ -48,17 +49,29 @@ class Scanner:
                 case ";":
                     self.tokens.append(Token(TokenType.SEMICOLON, self.get_token(pointer), "null", line))
                 case "=":
-                    if self.advance(pointer) == '=':
+                    if char_next == "=":
                         self.tokens.append(Token(TokenType.EQUAL_EQUAL, self.get_token_multi(pointer, 1), "null", line))
                         pointer += 1
                     else:
                         self.tokens.append(Token(TokenType.EQUAL, self.get_token(pointer), "null", line))
                 case "!":
-                    if self.advance(pointer) == '=':
+                    if char_next == "=":
                         self.tokens.append(Token(TokenType.BANG_EQUAL, self.get_token_multi(pointer, 1), "null", line))
                         pointer += 1
                     else:
                         self.tokens.append(Token(TokenType.BANG, self.get_token(pointer), "null", line))
+                case "<":
+                    if char_next == "=":
+                        self.tokens.append(Token(TokenType.LESS_EQUAL, self.get_token_multi(pointer, 1), "null", line))
+                        pointer += 1
+                    else:
+                        self.tokens.append(Token(TokenType.LESS, self.get_token(pointer), "null", line))
+                case ">":
+                    if char_next == "=":
+                        self.tokens.append(Token(TokenType.GREATER_EQUAL, self.get_token_multi(pointer, 1), "null", line))
+                        pointer += 1
+                    else:
+                        self.tokens.append(Token(TokenType.GREATER, self.get_token(pointer), "null", line))
                 case _:
                     print(f'[line {line}] Error: Unexpected character: {char}', file=sys.stderr)
                     self.error = True
