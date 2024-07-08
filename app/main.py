@@ -3,7 +3,7 @@ import sys
 
 def tokenize(file_contents):
     line = 0
-
+    error = False
     for c in file_contents:
         match c:
             case "(":
@@ -30,8 +30,11 @@ def tokenize(file_contents):
                 line += 1
             case _:
                 print("[line "+str(line)+"] Error: Unexpected character: " + c)
-                exit(65)
+                error = True
+
     print("EOF  null")
+    if error:
+        exit(65)
 
 
 def main():
