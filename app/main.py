@@ -1,8 +1,6 @@
 import sys
 from enum import Enum
 
-error_code = 0
-
 
 class Scanner:
     """
@@ -15,7 +13,10 @@ class Scanner:
         self.source = source
 
     def advance(self, current):
-        return self.source[current + 1]
+        if current + 1 >= len(self.source):
+            return self.source[current + 1]
+        else:
+            return None
 
     def scan(self):
         # Scan the line and add found tokens to the tokens list
@@ -142,6 +143,11 @@ def main():
     scanner = Scanner(file_contents)
     scanner.scan()
     print(*scanner.tokens, sep="\n")
+
+    if scanner.error:
+        exit(65)
+    else:
+        exit(0)
 
 
 if __name__ == "__main__":
