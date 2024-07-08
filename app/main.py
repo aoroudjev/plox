@@ -13,7 +13,7 @@ class Scanner:
         self.source = source
 
     def advance(self, current):
-        if current + 1 >= len(self.source):
+        if current + 1 <= len(self.source):
             return self.source[current + 1]
         else:
             return None
