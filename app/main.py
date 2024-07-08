@@ -32,7 +32,7 @@ def tokenize(file_contents):
             case "\n":
                 line += 1
             case _:
-                print(f'[line {line}] Error: Unexpected character: {c}')
+                print(f'[line {line}] Error: Unexpected character: {c}', file=sys.stderr)
                 error_code = 65
 
     print("EOF  null")
