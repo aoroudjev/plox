@@ -2,7 +2,7 @@ import sys
 
 
 def tokenize(file_contents):
-    line = 0
+    line = 1
     error = False
     for c in file_contents:
         match c:
