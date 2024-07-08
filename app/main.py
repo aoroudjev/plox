@@ -44,7 +44,7 @@ class Scanner:
                 case "+":
                     self.tokens.append(Token(TokenType.PLUS, self.get_token(pointer), "null", line))
                 case "-":
-                    self.tokens.append(Token(TokenType.RIGHT_PAREN, self.get_token(pointer), "null", line))
+                    self.tokens.append(Token(TokenType.MINUS, self.get_token(pointer), "null", line))
                 case ";":
                     self.tokens.append(Token(TokenType.SEMICOLON, self.get_token(pointer), "null", line))
                 case "=":
