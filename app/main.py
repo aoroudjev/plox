@@ -11,6 +11,15 @@ def tokenize(file_contents):
                 print("RIGHT_BRACE } null")
             case "{":
                 print("LEFT_BRACE { null")
+            case "*":
+                print("STAR * null")
+            case ".":
+                print("DOT . null")
+            case ",":
+                print("COMMA , null")
+            case "+":
+                print("PLUS + null")
+
     print("EOF  null")
 
 
