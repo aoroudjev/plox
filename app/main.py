@@ -31,6 +31,10 @@ def tokenize(file_contents):
                 print("SEMICOLON ; null")
             case "\n":
                 line += 1
+            case "=":
+                print("EQUAL = null")
+            case "==":
+                print("EQUAL_EQUAL == null")
             case _:
                 print(f'[line {line}] Error: Unexpected character: {c}', file=sys.stderr)
                 error_code = 65
