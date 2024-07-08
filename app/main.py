@@ -53,6 +53,12 @@ class Scanner:
                         pointer += 1
                     else:
                         self.tokens.append(Token(TokenType.EQUAL, self.get_token(pointer), "null", line))
+                case "!":
+                    if self.advance(pointer) == '=':
+                        self.tokens.append(Token(TokenType.BANG_EQUAL, self.get_token_multi(pointer, 1), "null", line))
+                        pointer += 1
+                    else:
+                        self.tokens.append(Token(TokenType.BANG, self.get_token(pointer), "null", line))
                 case _:
                     print(f'[line {line}] Error: Unexpected character: {char}', file=sys.stderr)
                     self.error = True
