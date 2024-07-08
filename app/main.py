@@ -1,6 +1,8 @@
 import sys
 
 def tokenize(file_contents):
+    line = 0
+
     for c in file_contents:
         match c:
             case "(":
@@ -23,6 +25,10 @@ def tokenize(file_contents):
                 print("MINUS - null")
             case ";":
                 print("SEMICOLON ; null")
+            case "\n":
+                line += 1
+            case _:
+                print("[line "+str(line)+"] Error: Unexpected character: " + c)
     print("EOF  null")
 
 
