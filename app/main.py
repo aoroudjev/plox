@@ -21,8 +21,8 @@ def tokenize(file_contents):
                 print("PLUS + null")
             case "-":
                 print("MINUS - null")
-
-
+            case ";":
+                print("SEMICOLON ; null")
     print("EOF  null")
 
 
