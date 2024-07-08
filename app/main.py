@@ -13,7 +13,7 @@ class Scanner:
         self.source = source
 
     def advance(self, current):
-        if current + 1 <= len(self.source):
+        if current + 1 < len(self.source):
             return self.source[current + 1]
         else:
             return None
@@ -57,12 +57,13 @@ class Scanner:
                     print(f'[line {line}] Error: Unexpected character: {char}', file=sys.stderr)
                     self.error = True
             pointer += 1
+        self.tokens.append(Token(TokenType.EOF, "", "null", line))
 
     def get_token(self, index):
         return self.get_token_multi(index, 0)
 
     def get_token_multi(self, index_start, span):
-        return self.source[index_start: index_start + span]
+        return self.source[index_start: (index_start + 1) + span]
 
 
 class Token:
