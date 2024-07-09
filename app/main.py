@@ -117,10 +117,17 @@ class Scanner:
     def string(self):
         """Parse for string literal"""
         while self.peek() != '"' and not self.is_at_end():
+            if self.peek() == '\n':
+                self.line += 1
             self.advance()
-        if not self.is_at_end():
-            self.advance()
-            self.add_token(TokenType.STRING, self.source[self.start + 1:self.pointer - 1])
+
+        if self.is_at_end():
+            self.error_code = 65
+            print(f'[line {self.line}] Error: Unterminated string.')
+            return
+
+        self.advance()
+        self.add_token(TokenType.STRING, str(self.source[self.start+1: self.pointer-1]))
 
     def scan_tokens(self):
         """Scanning loop controller"""
