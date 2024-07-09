@@ -193,7 +193,7 @@ class Scanner:
 
     def identifier(self):
         """Parse for identifier, fallback on reserved words."""
-        while self.peek().isalpha():
+        while self.peek().isalpha() or self.peek() == "_":
             self.advance()
         identifier = self.source[self.start:self.pointer]
         if identifier in self.keywords:
