@@ -102,11 +102,11 @@ class Scanner:
         """Parse for number literal"""
         while self.peek().isdigit():
             self.advance()
-        if self.peek() == '.' and self.peek_next().isdigit():
-            self.advance()
-            while self.peek().isdigit():
+        if self.peek() == '.' and not self.is_at_end():
+            while self.peek_next().isdigit():
                 self.advance()
-        self.add_token(TokenType.NUMBER, self.source[self.start:self.pointer])
+        self.advance()
+        self.add_token(TokenType.NUMBER, float(self.source[self.start:self.pointer]))
 
     def string(self):
         """Parse for string literal"""
