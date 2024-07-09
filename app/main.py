@@ -38,10 +38,10 @@ class Scanner:
             return self.source[self.pointer]
         return '\0'
 
-    def peek_next(self):
-        if (self.pointer + 1) < len(self.source):
-            return self.source[self.pointer + 1]
-        return '\0'
+    def peek_next(self) -> str:
+        if self.pointer + 1 >= len(self.source):
+            return "\0"
+        return self.source[self.pointer + 1]
 
     def scan_token(self):
         """Scans the line and extracts tokens."""
@@ -92,21 +92,27 @@ class Scanner:
             case '"':
                 self.string()
             case _:
-                if c.isdigit():
+                if self.is_digit(c):
                     self.number()
                 else:
                     self.error_code = 65
                     print(f'[line {self.line}] Error: Unexpected character: {c}', file=sys.stderr)
 
-    def number(self):
-        """Parse for number literal"""
-        while self.peek().isdigit():
+    @staticmethod
+    def is_digit(char: str) -> bool:
+        return "0" <= char <= "9"
+
+    def number(self) -> None:
+        while self.is_digit(self.peek()):
             self.advance()
-        if self.peek() == '.' and not self.is_at_end():
-            while self.peek_next().isdigit():
-                self.advance()
-        self.advance()
-        self.add_token(TokenType.NUMBER, float(self.source[self.start:self.pointer]))
+
+        if self.peek() == "." and self.is_digit(self.peek_next()):
+            self.advance()
+
+        while self.is_digit(self.peek()):
+            self.advance()
+
+        self.add_token(TokenType.NUMBER, float(self.source[self.start: self.pointer]))
 
     def string(self):
         """Parse for string literal"""
