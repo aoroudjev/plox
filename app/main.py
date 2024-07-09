@@ -1,12 +1,12 @@
 import sys
 from enum import Enum
 
+error_code = 0
 
 class Scanner:
     """
     Scanner class scans the line and extracts tokens.
     """
-
     def __init__(self, source):
         self.tokens = []
         self.pointer = 0
@@ -33,8 +33,14 @@ class Scanner:
         self.pointer += 1
         return True
 
+    def peek(self):
+        if not self.is_at_end():
+            return self.source[self.pointer]
+        return None
+
     def scan_token(self):
         """Scans the line and extracts tokens."""
+        global error_code
         c = self.advance()
         match c:
             case '\n':
@@ -69,11 +75,12 @@ class Scanner:
                 self.add_token(TokenType.GREATER_EQUAL if self.next_char('=') else TokenType.GREATER)
             case '/':
                 if self.next_char('/'):
-                    while self.peek() != '\n' or self.is_at_end():
+                    while self.peek() != '\n' and not self.is_at_end():
                         self.advance()
                 else:
                     self.add_token(TokenType.SLASH)
             case _:
+                error_code = 65
                 print(f'[line {self.line}] Error: Unexpected character {c}')
 
     def scan_tokens(self):
@@ -90,9 +97,6 @@ class Scanner:
         # self.pointer should always be bigger than self.start
         text = self.source[self.start:self.pointer]
         self.tokens.append(Token(token_type, text, None, self.line))
-
-    def peek(self):
-        return self.source[self.pointer]
 
 
 class Token:
@@ -177,6 +181,8 @@ def main():
     scanner = Scanner(file_contents)
     scanner.scan_tokens()
     print(*scanner.tokens, sep="\n")
+
+    exit(error_code)
 
 
 if __name__ == "__main__":
