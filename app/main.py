@@ -2,10 +2,97 @@ import sys
 from enum import Enum
 
 
+class Token:
+    """
+    Token class, contains all information of the token to return to the scanner.
+    """
+
+    def __init__(self, token_type: Enum, lexeme, literal, line):
+        self.type = token_type
+        self.lexeme = lexeme
+        self.literal = literal
+        self.line = line
+
+    def __str__(self):
+        if self.literal is None:
+            literal = "null"
+        else:
+            literal = self.literal
+        return f"{self.type.value} {self.lexeme} {literal}"
+
+
+class TokenType(Enum):
+    # Single-character tokens
+    LEFT_PAREN = "LEFT_PAREN"
+    RIGHT_PAREN = "RIGHT_PAREN"
+    LEFT_BRACE = "LEFT_BRACE"
+    RIGHT_BRACE = "RIGHT_BRACE"
+    COMMA = "COMMA"
+    DOT = "DOT"
+    PLUS = "PLUS"
+    MINUS = "MINUS"
+    STAR = "STAR"
+    SEMICOLON = "SEMICOLON"
+    SLASH = "SLASH"
+
+    # One or two character tokens
+    BANG = "BANG"
+    BANG_EQUAL = "BANG_EQUAL"
+    EQUAL = "EQUAL"
+    EQUAL_EQUAL = "EQUAL_EQUAL"
+    GREATER = "GREATER"
+    GREATER_EQUAL = "GREATER_EQUAL"
+    LESS = "LESS"
+    LESS_EQUAL = "LESS_EQUAL"
+
+    # Keywords
+    AND = "AND"
+    OR = "OR"
+    CLASS = "CLASS"
+    ELSE = "ELSE"
+    WHILE = "WHILE"
+    VAR = "VAR"
+    FALSE = "FALSE"
+    TRUE = "TRUE"
+    THIS = "THIS"
+    RETURN = "RETURN"
+    PRINT = "PRINT"
+    IF = "IF"
+    NIL = "NIL"
+    FUN = "FUN"
+    SUPER = "SUPER"
+
+    # Multi-character tokens
+    STRING = "STRING"
+    NUMBER = "NUMBER"
+    IDENTIFIER = "IDENTIFIER"
+
+    # EOF
+    EOF = "EOF"
+
+
 class Scanner:
     """
     Scanner class scans the line and extracts tokens.
     """
+    keywords = {
+        "and": TokenType.AND,
+        "or": TokenType.OR,
+        "class": TokenType.CLASS,
+        "else": TokenType.ELSE,
+        "while": TokenType.WHILE,
+        "var": TokenType.VAR,
+        "false": TokenType.FALSE,
+        "true": TokenType.TRUE,
+        "return": TokenType.RETURN,
+        "print": TokenType.PRINT,
+        "if": TokenType.IF,
+        "nil": TokenType.NIL,
+        "fun": TokenType.FUN,
+        "super": TokenType.SUPER,
+        "this": TokenType.THIS,
+    }
+
     def __init__(self, source):
         self.tokens = []
         self.pointer = 0
@@ -94,6 +181,8 @@ class Scanner:
             case _:
                 if self.is_digit(c):
                     self.number()
+                elif c.isalpha():
+                    self.identifier()
                 else:
                     self.error_code = 65
                     print(f'[line {self.line}] Error: Unexpected character: {c}', file=sys.stderr)
@@ -102,7 +191,18 @@ class Scanner:
     def is_digit(char: str) -> bool:
         return "0" <= char <= "9"
 
+    def identifier(self):
+        """Parse for identifier, fallback on reserved words."""
+        while self.peek().isalpha():
+            self.advance()
+        identifier = self.source[self.start:self.pointer]
+        if identifier in self.keywords:
+            self.add_token(self.keywords[identifier])
+        else:
+            self.add_token(TokenType.IDENTIFIER)
+
     def number(self) -> None:
+        """Parse for numerical literal"""
         while self.is_digit(self.peek()):
             self.advance()
 
@@ -127,7 +227,7 @@ class Scanner:
             return
 
         self.advance()
-        self.add_token(TokenType.STRING, str(self.source[self.start+1: self.pointer-1]))
+        self.add_token(TokenType.STRING, str(self.source[self.start + 1: self.pointer - 1]))
 
     def scan_tokens(self):
         """Scanning loop controller"""
@@ -143,74 +243,6 @@ class Scanner:
         # self.pointer should always be bigger than self.start
         text = self.source[self.start:self.pointer]
         self.tokens.append(Token(token_type, text, literal, self.line))
-
-
-class Token:
-    """
-    Token class, contains all information of the token to return to the scanner.
-    """
-
-    def __init__(self, token_type: Enum, lexeme, literal, line):
-        self.type = token_type
-        self.lexeme = lexeme
-        self.literal = literal
-        self.line = line
-
-    def __str__(self):
-        if self.literal is None:
-            literal = "null"
-        else:
-            literal = self.literal
-        return f"{self.type.value} {self.lexeme} {literal}"
-
-
-class TokenType(Enum):
-    # Single-character tokens
-    LEFT_PAREN = "LEFT_PAREN"
-    RIGHT_PAREN = "RIGHT_PAREN"
-    LEFT_BRACE = "LEFT_BRACE"
-    RIGHT_BRACE = "RIGHT_BRACE"
-    COMMA = "COMMA"
-    DOT = "DOT"
-    PLUS = "PLUS"
-    MINUS = "MINUS"
-    STAR = "STAR"
-    SEMICOLON = "SEMICOLON"
-    SLASH = "SLASH"
-
-    # One or two character tokens
-    BANG = "BANG"
-    BANG_EQUAL = "BANG_EQUAL"
-    EQUAL = "EQUAL"
-    EQUAL_EQUAL = "EQUAL_EQUAL"
-    GREATER = "GREATER"
-    GREATER_EQUAL = "GREATER_EQUAL"
-    LESS = "LESS"
-    LESS_EQUAL = "LESS_EQUAL"
-
-    # Keywords
-    AND = "AND"
-    OR = "OR"
-    CLASS = "CLASS"
-    ELSE = "ELSE"
-    WHILE = "WHILE"
-    VAR = "VAR"
-    FALSE = "FALSE"
-    TRUE = "TRUE"
-    THIS = "THIS"
-    RETURN = "RETURN"
-    PRINT = "PRINT"
-    IF = "IF"
-    NIL = "NIL"
-    FUN = "FUN"
-    SUPER = "SUPER"
-
-    # Multi-character tokens
-    STRING = "STRING"
-    NUMBER = "NUMBER"
-
-    # EOF
-    EOF = "EOF"
 
 
 def main():
