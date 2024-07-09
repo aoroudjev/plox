@@ -123,7 +123,7 @@ class Scanner:
 
         if self.is_at_end():
             self.error_code = 65
-            print(f'[line {self.line}] Error: Unterminated string.')
+            print(f'[line {self.line}] Error: Unterminated string.', file=sys.stderr)
             return
 
         self.advance()
