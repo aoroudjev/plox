@@ -87,7 +87,7 @@ class Scanner:
                     self.add_token(TokenType.STRING, self.source[self.start+1:self.pointer-1])
                 else:
                     error_code = 65
-                    print(f'[line {self.line}] Error: Unexpected character: {c}', file=sys.stderr)
+                    print(f'[line {self.line}] Error: Unterminated string.', file=sys.stderr)
             case ' ':
                 return
             case '\t':
