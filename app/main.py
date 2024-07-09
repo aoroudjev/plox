@@ -79,6 +79,15 @@ class Scanner:
                         self.advance()
                 else:
                     self.add_token(TokenType.SLASH)
+            case '"':
+                while self.peek() != '"' and not self.is_at_end():
+                    self.advance()
+                if not self.is_at_end():
+                    self.advance()
+                    self.add_token(TokenType.STRING, self.source[self.start+1:self.pointer-1])
+                else:
+                    error_code = 65
+                    print(f'[line {self.line}] Error: Unexpected character: {c}', file=sys.stderr)
             case ' ':
                 return
             case '\t':
@@ -102,7 +111,7 @@ class Scanner:
         """ Adds a new token to the tokens list."""
         # self.pointer should always be bigger than self.start
         text = self.source[self.start:self.pointer]
-        self.tokens.append(Token(token_type, text, None, self.line))
+        self.tokens.append(Token(token_type, text, literal, self.line))
 
 
 class Token:
@@ -164,6 +173,9 @@ class TokenType(Enum):
     NIL = "NIL"
     FUN = "FUN"
     SUPER = "SUPER"
+
+    # Multi-character tokens
+    STRING = "STRING"
 
     # EOF
     EOF = "EOF"
