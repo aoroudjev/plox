@@ -81,7 +81,7 @@ class Scanner:
                     self.add_token(TokenType.SLASH)
             case _:
                 error_code = 65
-                print(f'[line {self.line}] Error: Unexpected character {c}', file=sys.stderr)
+                print(f'[line {self.line}] Error: Unexpected character: {c}', file=sys.stderr)
 
     def scan_tokens(self):
         """Scanning loop controller"""
