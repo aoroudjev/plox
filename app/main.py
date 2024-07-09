@@ -1,7 +1,6 @@
 import sys
 from enum import Enum
 
-error_code = 0
 
 class Scanner:
     """
@@ -13,6 +12,7 @@ class Scanner:
         self.start = 0
         self.line = 1
         self.source = source
+        self.error_code = 0
 
     def is_at_end(self):
         """Checks if the line is at the end of the file."""
@@ -36,11 +36,15 @@ class Scanner:
     def peek(self):
         if not self.is_at_end():
             return self.source[self.pointer]
-        return None
+        return '\0'
+
+    def peek_next(self):
+        if (self.pointer + 1) < len(self.source):
+            return self.source[self.pointer + 1]
+        return '\0'
 
     def scan_token(self):
         """Scans the line and extracts tokens."""
-        global error_code
         c = self.advance()
         match c:
             case '\n':
@@ -79,24 +83,38 @@ class Scanner:
                         self.advance()
                 else:
                     self.add_token(TokenType.SLASH)
-            case '"':
-                while self.peek() != '"' and not self.is_at_end():
-                    self.advance()
-                if not self.is_at_end():
-                    self.advance()
-                    self.add_token(TokenType.STRING, self.source[self.start+1:self.pointer-1])
-                else:
-                    error_code = 65
-                    print(f'[line {self.line}] Error: Unterminated string.', file=sys.stderr)
             case ' ':
                 return
             case '\t':
                 return
             case '\r':
                 return
+            case '"':
+                self.string()
             case _:
-                error_code = 65
-                print(f'[line {self.line}] Error: Unexpected character: {c}', file=sys.stderr)
+                if c.isdigit():
+                    self.number()
+                else:
+                    self.error_code = 65
+                    print(f'[line {self.line}] Error: Unexpected character: {c}', file=sys.stderr)
+
+    def number(self):
+        """Parse for number literal"""
+        while self.peek().isdigit():
+            self.advance()
+        if self.peek() == '.' and self.peek_next().isdigit():
+            self.advance()
+            while self.peek().isdigit():
+                self.advance()
+        self.add_token(TokenType.NUMBER, self.source[self.start:self.pointer])
+
+    def string(self):
+        """Parse for string literal"""
+        while self.peek() != '"' and not self.is_at_end():
+            self.advance()
+        if not self.is_at_end():
+            self.advance()
+            self.add_token(TokenType.STRING, self.source[self.start + 1:self.pointer - 1])
 
     def scan_tokens(self):
         """Scanning loop controller"""
@@ -176,6 +194,7 @@ class TokenType(Enum):
 
     # Multi-character tokens
     STRING = "STRING"
+    NUMBER = "NUMBER"
 
     # EOF
     EOF = "EOF"
@@ -200,7 +219,7 @@ def main():
     scanner.scan_tokens()
     print(*scanner.tokens, sep="\n")
 
-    exit(error_code)
+    exit(scanner.error_code)
 
 
 if __name__ == "__main__":
