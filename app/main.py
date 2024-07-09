@@ -181,7 +181,7 @@ class Scanner:
             case _:
                 if self.is_digit(c):
                     self.number()
-                elif c.isalpha():
+                elif c.isalpha() or c == "_":
                     self.identifier()
                 else:
                     self.error_code = 65
