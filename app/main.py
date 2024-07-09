@@ -8,81 +8,91 @@ class Scanner:
     """
 
     def __init__(self, source):
-        self.error = False
         self.tokens = []
+        self.pointer = 0
+        self.start = 0
+        self.line = 1
         self.source = source
 
-    def advance(self, current):
-        if current + 1 < len(self.source):
-            return self.source[current + 1]
-        else:
-            return None
+    def is_at_end(self):
+        """Checks if the line is at the end of the file."""
+        return self.pointer == len(self.source)
 
-    def scan(self):
-        # Scan the line and add found tokens to the tokens list
-        pointer = 0
-        line = 1
-        while pointer < len(self.source):
-            char = self.source[pointer]
-            char_next = self.advance(pointer)
-            match char:
-                case '\n':
-                    line += 1
-                case "(":
-                    self.tokens.append(Token(TokenType.LEFT_PAREN, self.get_token(pointer), "null", line))
-                case ")":
-                    self.tokens.append(Token(TokenType.RIGHT_PAREN, self.get_token(pointer), "null", line))
-                case "}":
-                    self.tokens.append(Token(TokenType.RIGHT_BRACE, self.get_token(pointer), "null", line))
-                case "{":
-                    self.tokens.append(Token(TokenType.LEFT_BRACE, self.get_token(pointer), "null", line))
-                case "*":
-                    self.tokens.append(Token(TokenType.STAR, self.get_token(pointer), "null", line))
-                case ".":
-                    self.tokens.append(Token(TokenType.DOT, self.get_token(pointer), "null", line))
-                case ",":
-                    self.tokens.append(Token(TokenType.COMMA, self.get_token(pointer), "null", line))
-                case "+":
-                    self.tokens.append(Token(TokenType.PLUS, self.get_token(pointer), "null", line))
-                case "-":
-                    self.tokens.append(Token(TokenType.MINUS, self.get_token(pointer), "null", line))
-                case ";":
-                    self.tokens.append(Token(TokenType.SEMICOLON, self.get_token(pointer), "null", line))
-                case "=":
-                    if char_next == "=":
-                        self.tokens.append(Token(TokenType.EQUAL_EQUAL, self.get_token_multi(pointer, 1), "null", line))
-                        pointer += 1
-                    else:
-                        self.tokens.append(Token(TokenType.EQUAL, self.get_token(pointer), "null", line))
-                case "!":
-                    if char_next == "=":
-                        self.tokens.append(Token(TokenType.BANG_EQUAL, self.get_token_multi(pointer, 1), "null", line))
-                        pointer += 1
-                    else:
-                        self.tokens.append(Token(TokenType.BANG, self.get_token(pointer), "null", line))
-                case "<":
-                    if char_next == "=":
-                        self.tokens.append(Token(TokenType.LESS_EQUAL, self.get_token_multi(pointer, 1), "null", line))
-                        pointer += 1
-                    else:
-                        self.tokens.append(Token(TokenType.LESS, self.get_token(pointer), "null", line))
-                case ">":
-                    if char_next == "=":
-                        self.tokens.append(Token(TokenType.GREATER_EQUAL, self.get_token_multi(pointer, 1), "null", line))
-                        pointer += 1
-                    else:
-                        self.tokens.append(Token(TokenType.GREATER, self.get_token(pointer), "null", line))
-                case _:
-                    print(f'[line {line}] Error: Unexpected character: {char}', file=sys.stderr)
-                    self.error = True
-            pointer += 1
-        self.tokens.append(Token(TokenType.EOF, "", "null", line))
+    def advance(self):
+        character = self.source[self.pointer]
+        self.pointer += 1
+        return character
 
-    def get_token(self, index):
-        return self.get_token_multi(index, 0)
+    def next_char(self, character):
+        """ Returns True if the next character is the expected 'character' param """
+        if self.is_at_end():
+            return False
+        if self.source[self.pointer] != character:
+            return False
 
-    def get_token_multi(self, index_start, span):
-        return self.source[index_start: (index_start + 1) + span]
+        self.pointer += 1
+        return True
+
+    def scan_token(self):
+        """Scans the line and extracts tokens."""
+        c = self.advance()
+        match c:
+            case '\n':
+                self.line += 1
+            case '(':
+                self.add_token(TokenType.LEFT_PAREN)
+            case ')':
+                self.add_token(TokenType.RIGHT_PAREN)
+            case '{':
+                self.add_token(TokenType.LEFT_BRACE)
+            case '}':
+                self.add_token(TokenType.RIGHT_BRACE)
+            case ',':
+                self.add_token(TokenType.COMMA)
+            case '.':
+                self.add_token(TokenType.DOT)
+            case '-':
+                self.add_token(TokenType.MINUS)
+            case '+':
+                self.add_token(TokenType.PLUS)
+            case ';':
+                self.add_token(TokenType.SEMICOLON)
+            case '*':
+                self.add_token(TokenType.STAR)
+            case '!':
+                self.add_token(TokenType.BANG_EQUAL if self.next_char('=') else TokenType.BANG)
+            case '=':
+                self.add_token(TokenType.EQUAL_EQUAL if self.next_char('=') else TokenType.EQUAL)
+            case '<':
+                self.add_token(TokenType.LESS_EQUAL if self.next_char('=') else TokenType.LESS)
+            case '>':
+                self.add_token(TokenType.GREATER_EQUAL if self.next_char('=') else TokenType.GREATER)
+            case '/':
+                if self.next_char('/'):
+                    while self.peek() != '\n' or self.is_at_end():
+                        self.advance()
+                else:
+                    self.add_token(TokenType.SLASH)
+            case _:
+                print(f'[line {self.line}] Error: Unexpected character {c}')
+
+    def scan_tokens(self):
+        """Scanning loop controller"""
+        while not self.is_at_end():
+            self.start = self.pointer
+            self.scan_token()
+
+        self.tokens.append(Token(TokenType.EOF, "", None, self.line))
+        return None
+
+    def add_token(self, token_type: Enum, literal=None):
+        """ Adds a new token to the tokens list."""
+        # self.pointer should always be bigger than self.start
+        text = self.source[self.start:self.pointer]
+        self.tokens.append(Token(token_type, text, None, self.line))
+
+    def peek(self):
+        return self.source[self.pointer]
 
 
 class Token:
@@ -90,14 +100,18 @@ class Token:
     Token class, contains all information of the token to return to the scanner.
     """
 
-    def __init__(self, token_type, lexeme, literal, line):
+    def __init__(self, token_type: Enum, lexeme, literal, line):
         self.type = token_type
         self.lexeme = lexeme
         self.literal = literal
         self.line = line
 
     def __str__(self):
-        return f"{self.type.value} {self.lexeme} {self.literal}"
+        if self.literal is None:
+            literal = "null"
+        else:
+            literal = self.literal
+        return f"{self.type.value} {self.lexeme} {literal}"
 
 
 class TokenType(Enum):
@@ -161,13 +175,8 @@ def main():
         file_contents = file.read()
 
     scanner = Scanner(file_contents)
-    scanner.scan()
+    scanner.scan_tokens()
     print(*scanner.tokens, sep="\n")
-
-    if scanner.error:
-        exit(65)
-    else:
-        exit(0)
 
 
 if __name__ == "__main__":
